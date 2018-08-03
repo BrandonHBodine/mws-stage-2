@@ -1,7 +1,8 @@
+'use strict';
 /**
  * Common database helper functions.
  */
-class DBHelper {
+export default class DBHelper {
 	/**
 	 * Database URL.
 	 * Change this to restaurants.json file location on your server.
@@ -20,7 +21,6 @@ class DBHelper {
 			if (xhr.status === 200) {
 				// Got a success response from server!
 				const json = JSON.parse(xhr.responseText);
-				console.log(json);
 				const restaurants = json;
 				callback(null, restaurants);
 			} else {

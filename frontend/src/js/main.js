@@ -1,8 +1,17 @@
+import idb from 'idb';
+import DBHelper from './dbhelper';
+import TryServiceWorker from './all';
 let restaurants;
 let neighborhoods;
 let cuisines;
 var map;
 var markers = [];
+
+/**
+ * Check for Service Worker in browser
+ */
+
+TryServiceWorker();
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -193,4 +202,3 @@ addMarkersToMap = (restaurants = self.restaurants) => {
 		self.markers.push(marker);
 	});
 };
-

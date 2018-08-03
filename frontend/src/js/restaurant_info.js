@@ -1,5 +1,15 @@
+import idb from 'idb';
+import DBHelper from './dbhelper';
+import TryServiceWorker from './all';
+
 let restaurant;
 var map;
+
+
+/**
+ * Check for Service Worker in browser
+ */
+TryServiceWorker();
 
 /**
  * Initialize Google map, called from HTML.

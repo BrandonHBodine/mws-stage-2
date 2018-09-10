@@ -1,3 +1,5 @@
+import idb from 'idb';
+
 const staticCacheName = 'restaurant-reviews-v1';
 const contentImgsCache = 'restaurant-images-v1';
 const mapCache = 'restaurant-map-v1';
@@ -5,13 +7,62 @@ const allCaches = [staticCacheName, contentImgsCache, mapCache];
 const filesArr = [
 	'/index.html',
 	'/restaurant.html',
-	'css/styles.css',
-	'js/dbhelper.js',
-	'js/main.js',
-	'js/restaurant_info.js'
+	'/restaurant.bundle.js',
+	'/main.bundle.js'
 ];
 
-import idb from 'idb';
+var dbPromise = idb.open('restaurant-reviews', 1, function(upgradeDB) {
+	upgradeDB.createObjectStore('restaurants');
+});
+
+const idbRestaurants = {
+	get(key) {
+		return dbPromise.then(db => {
+			return db
+				.transaction('restaurants')
+				.objectStore('restaurants')
+				.get(key);
+		});
+	},
+	set(key, val) {
+		return dbPromise.then(db => {
+			const tx = db.transaction('restaurants', 'readwrite');
+			tx.objectStore('restaurants').put(val, key);
+			return tx.complete;
+		});
+	},
+	delete(key) {
+		return dbPromise.then(db => {
+			const tx = db.transaction('restaurants', 'readwrite');
+			tx.objectStore('restaurants').delete(key);
+			return tx.complete;
+		});
+	},
+	clear() {
+		return dbPromise.then(db => {
+			const tx = db.transaction('restaurants', 'readwrite');
+			tx.objectStore('restaurants').clear();
+			return tx.complete;
+		});
+	},
+	keys() {
+		return dbPromise.then(db => {
+			const tx = db.transaction('restaurants');
+			const keys = [];
+			const store = tx.objectStore('restaurants');
+
+			// This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
+			// openKeyCursor isn't supported by Safari, so we fall back
+			(store.iterateKeyCursor || store.iterateCursor).call(store, cursor => {
+				if (!cursor) return;
+				keys.push(cursor.key);
+				cursor.continue();
+			});
+
+			return tx.complete.then(() => keys);
+		});
+	}
+};
 
 self.addEventListener('install', function(event) {
 	console.log('ServiceWorker installed');
@@ -79,7 +130,13 @@ self.addEventListener('fetch', function(event) {
 		}
 	}
 
-	// Catch all cache response
+	// Resturants JSON
+	if (requestUrl.pathname === '/restaurants') {
+		event.respondWith(serveRestaurantsJSON(event.request));
+		return;
+	}
+
+	// Catch all cache external responses
 	event.respondWith(
 		caches.match(event.request).then(function(response) {
 			return response || fetch(event.request);
@@ -120,6 +177,27 @@ function serveMap(requestMap) {
 				cache.put(mapName, networkResponseMap.clone());
 				return networkResponseMap;
 			});
+		});
+	});
+}
+
+function serveRestaurantsJSON(requestJSON) {
+	return idbRestaurants.get('restaurants-json').then(function(val) {
+		if (val) {
+			console.log('IndexDB JSON Found')
+			return new Response(JSON.stringify(val));
+		}
+
+		console.log('IndexDB Empty Returning Fetch');
+		return fetch(requestJSON).then(function(res) {
+			let indexValue = res.clone();
+			
+			// Put JSON in indexedDB
+			indexValue.json().then(function(json) {
+				idbRestaurants.set('restaurants-json', json);
+			});
+			
+			return res;
 		});
 	});
 }

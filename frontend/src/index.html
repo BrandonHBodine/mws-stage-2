@@ -5,14 +5,19 @@
   <!-- meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#811410"/>
 
   <link rel="manifest" href="/manifest.json">
 
   <link rel="stylesheet" src="https://normalize-css.googlecode.com/svn/trunk/normalize.css" />
 
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- Loaded with Webpack now -->
+  <!-- <link rel="stylesheet" href="css/styles.css"> -->
 
-  <title><%= htmlWebpackPlugin.options.title %></title>
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+
 </head>
 
 <body>
@@ -34,13 +39,13 @@
       <h2 class="filter-header">Filter Results</h2>
       <div>
         <label for="neighborhoods-select">By Neighborhood</label>
-        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
+        <select id="neighborhoods-select" name="neighborhoods">
           <option value="all">All Neighborhoods</option>
         </select>
       </div>
       <div>
         <label for="cuisines-select">By Cuisine</label>
-        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
+        <select id="cuisines-select" name="cuisines">
           <option value="all">All Cuisines</option>
         </select>
       </div>
@@ -62,8 +67,10 @@
   <!-- <script type="text/javascript" src="js/all.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/main.js"></script> -->
-  
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEHTLqQlbIc4-odc2DnMiEF2uF3arBz4s&libraries=places&callback=initMap"></script>
+
+  <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEHTLqQlbIc4-odc2DnMiEF2uF3arBz4s&libraries=places&callback=initMap"></script> -->
+  <!-- <script async defer src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDEHTLqQlbIc4-odc2DnMiEF2uF3arBz4s&callback=initMap"></script> -->
+
 </body>
 
 </html>

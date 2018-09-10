@@ -1,11 +1,13 @@
-import idb from 'idb';
 import DBHelper from './dbhelper';
 import TryServiceWorker from './all';
+
+const loadGoogleMapsApi = require('load-google-maps-api');
+
 let restaurants;
 let neighborhoods;
 let cuisines;
-var map;
-var markers = [];
+let map;
+let markers = [];
 
 /**
  * Check for Service Worker in browser
@@ -14,18 +16,9 @@ var markers = [];
 TryServiceWorker();
 
 /**
- * Fetch neighborhoods and cuisines as soon as the page is loaded.
- */
-
-document.addEventListener('DOMContentLoaded', event => {
-	fetchNeighborhoods();
-	fetchCuisines();
-});
-
-/**
  * Fetch all neighborhoods and set their HTML.
  */
-fetchNeighborhoods = () => {
+function fetchNeighborhoods() {
 	DBHelper.fetchNeighborhoods((error, neighborhoods) => {
 		if (error) {
 			// Got an error
@@ -35,12 +28,12 @@ fetchNeighborhoods = () => {
 			fillNeighborhoodsHTML();
 		}
 	});
-};
+}
 
 /**
  * Set neighborhoods HTML.
  */
-fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
+function fillNeighborhoodsHTML(neighborhoods = self.neighborhoods) {
 	const select = document.getElementById('neighborhoods-select');
 	neighborhoods.forEach(neighborhood => {
 		const option = document.createElement('option');
@@ -48,12 +41,12 @@ fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
 		option.value = neighborhood;
 		select.append(option);
 	});
-};
+}
 
 /**
  * Fetch all cuisines and set their HTML.
  */
-fetchCuisines = () => {
+function fetchCuisines() {
 	DBHelper.fetchCuisines((error, cuisines) => {
 		if (error) {
 			// Got an error!
@@ -63,12 +56,12 @@ fetchCuisines = () => {
 			fillCuisinesHTML();
 		}
 	});
-};
+}
 
 /**
  * Set cuisines HTML.
  */
-fillCuisinesHTML = (cuisines = self.cuisines) => {
+function fillCuisinesHTML(cuisines = self.cuisines) {
 	const select = document.getElementById('cuisines-select');
 
 	cuisines.forEach(cuisine => {
@@ -77,7 +70,7 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
 		option.value = cuisine;
 		select.append(option);
 	});
-};
+}
 
 /**
  * Initialize Google map, called from HTML.
@@ -98,7 +91,7 @@ window.initMap = () => {
 /**
  * Update page and map for current restaurants.
  */
-updateRestaurants = () => {
+function updateRestaurants() {
 	const cSelect = document.getElementById('cuisines-select');
 	const nSelect = document.getElementById('neighborhoods-select');
 
@@ -121,39 +114,42 @@ updateRestaurants = () => {
 			}
 		}
 	);
-};
+}
 
 /**
  * Clear current restaurants, their HTML and remove their map markers.
  */
-resetRestaurants = restaurants => {
+function resetRestaurants(restaurants) {
 	// Remove all restaurants
 	self.restaurants = [];
 	const ul = document.getElementById('restaurants-list');
 	ul.innerHTML = '';
 
 	// Remove all map markers
-	self.markers.forEach(m => m.setMap(null));
+	if (self.markers && self.markers.length > 0) {
+		self.markers.forEach(m => m.setMap(null));
+	}
+
 	self.markers = [];
 	self.restaurants = restaurants;
-};
+}
 
 /**
  * Create all restaurants HTML and add them to the webpage.
  */
 
-fillRestaurantsHTML = (restaurants = self.restaurants) => {
+function fillRestaurantsHTML(restaurants = self.restaurants) {
 	const ul = document.getElementById('restaurants-list');
 	restaurants.forEach(restaurant => {
 		ul.append(createRestaurantHTML(restaurant));
 	});
 	addMarkersToMap();
-};
+}
 
 /**
  * Create restaurant HTML.
  */
-createRestaurantHTML = restaurant => {
+function createRestaurantHTML(restaurant) {
 	const li = document.createElement('li');
 
 	const image = document.createElement('img');
@@ -187,12 +183,12 @@ createRestaurantHTML = restaurant => {
 	section.append(more);
 
 	return li;
-};
+}
 
 /**
  * Add markers for current restaurants to the map.
  */
-addMarkersToMap = (restaurants = self.restaurants) => {
+function addMarkersToMap(restaurants = self.restaurants) {
 	restaurants.forEach(restaurant => {
 		// Add marker to the map
 		const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
@@ -201,4 +197,30 @@ addMarkersToMap = (restaurants = self.restaurants) => {
 		});
 		self.markers.push(marker);
 	});
-};
+}
+
+/**
+ * Get the google maps API stored in a promise
+ *
+ */
+loadGoogleMapsApi({ key: 'AIzaSyDEHTLqQlbIc4-odc2DnMiEF2uF3arBz4s' }).then(
+	() => {
+		window.initMap();
+	}
+);
+
+/**
+ * Fetch neighborhoods and cuisines as soon as the page is loaded.
+ */
+document.addEventListener('DOMContentLoaded', event => {
+	fetchNeighborhoods();
+	fetchCuisines();
+
+	// Attach event listners
+	document
+		.getElementById('cuisines-select')
+		.addEventListener('change', updateRestaurants);
+	document
+		.getElementById('neighborhoods-select')
+		.addEventListener('change', updateRestaurants);
+});

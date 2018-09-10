@@ -5,7 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-	mode: 'production',
+	mode: 'development',
 	entry: {
 		main: './src/js/main.js',
 		restaurant: './src/js/restaurant_info.js',
@@ -13,7 +13,8 @@ module.exports = {
 	},
 	devtool: 'inline-source-map',
 	devServer: {
-		contentBase: './dist'
+		contentBase: './dist',
+		hot: false
 	},
 	module: {
 		rules: [
@@ -48,7 +49,9 @@ module.exports = {
 				from: './manifest.json',
 				to: './manifest.json'
 			}
-		])
+		]),
+
+		new webpack.HotModuleReplacementPlugin()
 	],
 	output: {
 		filename: chunkData => {

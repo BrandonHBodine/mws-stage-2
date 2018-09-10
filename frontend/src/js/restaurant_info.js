@@ -1,14 +1,14 @@
-import idb from 'idb';
 import DBHelper from './dbhelper';
 import TryServiceWorker from './all';
+import loadGoogleMapsApi from 'load-google-maps-api';
 
 let restaurant;
 var map;
 
-
 /**
  * Check for Service Worker in browser
  */
+
 TryServiceWorker();
 
 /**
@@ -34,7 +34,7 @@ window.initMap = () => {
 /**
  * Get current restaurant from page URL.
  */
-fetchRestaurantFromURL = callback => {
+function fetchRestaurantFromURL(callback) {
 	if (self.restaurant) {
 		// restaurant already fetched!
 		callback(null, self.restaurant);
@@ -56,12 +56,12 @@ fetchRestaurantFromURL = callback => {
 			callback(null, restaurant);
 		});
 	}
-};
+}
 
 /**
  * Create restaurant HTML and add it to the webpage
  */
-fillRestaurantHTML = (restaurant = self.restaurant) => {
+function fillRestaurantHTML(restaurant = self.restaurant) {
 	const name = document.getElementById('restaurant-name');
 	name.innerHTML = restaurant.name;
 
@@ -82,14 +82,14 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 	}
 	// fill reviews
 	fillReviewsHTML();
-};
+}
 
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.
  */
-fillRestaurantHoursHTML = (
+function fillRestaurantHoursHTML(
 	operatingHours = self.restaurant.operating_hours
-) => {
+) {
 	const hours = document.getElementById('restaurant-hours');
 	for (let key in operatingHours) {
 		const row = document.createElement('tr');
@@ -105,12 +105,12 @@ fillRestaurantHoursHTML = (
 
 		hours.appendChild(row);
 	}
-};
+}
 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+function fillReviewsHTML(reviews = self.restaurant.reviews) {
 	const container = document.getElementById('reviews-container');
 	const title = document.createElement('h3');
 	title.innerHTML = 'Reviews';
@@ -127,12 +127,12 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 		ul.appendChild(createReviewHTML(review));
 	});
 	container.appendChild(ul);
-};
+}
 
 /**
  * Create review HTML and add it to the webpage.
  */
-createReviewHTML = review => {
+function createReviewHTML(review) {
 	const li = document.createElement('li');
 	const name = document.createElement('p');
 	name.innerHTML = review.name;
@@ -151,23 +151,23 @@ createReviewHTML = review => {
 	li.appendChild(comments);
 
 	return li;
-};
+}
 
 /**
  * Add restaurant name to the breadcrumb navigation menu
  */
-fillBreadcrumb = (restaurant = self.restaurant) => {
+function fillBreadcrumb(restaurant = self.restaurant) {
 	const breadcrumb = document.getElementById('breadcrumb');
 	const li = document.createElement('li');
 	li.setAttribute('aria-current', 'page');
 	li.innerHTML = restaurant.name;
 	breadcrumb.appendChild(li);
-};
+}
 
 /**
  * Get a parameter by name from page URL.
  */
-getParameterByName = (name, url) => {
+function getParameterByName(name, url) {
 	if (!url) url = window.location.href;
 	name = name.replace(/[\[\]]/g, '\\$&');
 	const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
@@ -175,4 +175,14 @@ getParameterByName = (name, url) => {
 	if (!results) return null;
 	if (!results[2]) return '';
 	return decodeURIComponent(results[2].replace(/\+/g, ' '));
-};
+}
+
+/**
+ * Get the google maps API stored in a promise
+ *
+ */
+loadGoogleMapsApi({ key: 'AIzaSyDEHTLqQlbIc4-odc2DnMiEF2uF3arBz4s' }).then(
+	() => {
+		window.initMap();
+	}
+);

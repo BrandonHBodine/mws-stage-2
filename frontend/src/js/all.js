@@ -1,10 +1,13 @@
+import '../css/styles.css';
+
 /***
  * Register Service worker if avaliable in browser
  **/
-export function TryServiceWorker() {
+
+export default function TryServiceWorker() {
 	if ('serviceWorker' in navigator) {
 		window.addEventListener('load', function() {
-			navigator.serviceWorker.register('./sw.js').then(
+			navigator.serviceWorker.register('/sw.js').then(
 				function(registration) {
 					console.log(
 						'Service Worker file registration successful!',

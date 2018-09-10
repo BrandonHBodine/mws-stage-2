@@ -20,6 +20,7 @@ export default class DBHelper {
 		xhr.onload = () => {
 			if (xhr.status === 200) {
 				// Got a success response from server!
+				console.log(xhr);
 				const json = JSON.parse(xhr.responseText);
 				const restaurants = json;
 				callback(null, restaurants);
